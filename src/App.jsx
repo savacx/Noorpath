@@ -634,11 +634,18 @@ function AimTrainerSection({ aim }) {
           type="button"
           className={`aim-board ${aim.running ? 'running' : ''}`}
           ref={aim.boardRef}
-          onClick={aim.miss}
+          onClick={() => {
+            if (aim.running) {
+              aim.miss()
+            } else {
+              aim.start()
+            }
+          }}
         >
           {!aim.running && (
             <div className="aim-placeholder">
               <p>Click start, then tap the circle as fast as you can.</p>
+              <p className="aim-hint">Tap anywhere to begin.</p>
             </div>
           )}
           {aim.running && (

@@ -931,7 +931,7 @@
 
 .aim-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: 1fr;
   gap: 24px;
 }
 
@@ -958,6 +958,12 @@
   color: var(--text-secondary);
   padding: 24px;
   text-align: center;
+}
+
+.aim-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .aim-target {
