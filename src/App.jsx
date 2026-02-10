@@ -121,6 +121,30 @@ function BackgroundPicker({ background, onChange }) {
   )
 }
 
+function NavBar({ background, pwa, children }) {
+  return (
+    <header className="site-header">
+      <nav className="nav">
+        <Link to="/" className="brand">
+          <img className="brand-logo" src={logo} alt="Noorpath logo" />
+          <div>
+            <p className="brand-title">Noorpath</p>
+            <p className="brand-tag">Brain Test Studio</p>
+          </div>
+        </Link>
+        <div className="nav-links">
+          {children}
+          <BackgroundPicker
+            background={background.background}
+            onChange={background.setBackground}
+          />
+          <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
+        </div>
+      </nav>
+    </header>
+  )
+}
+
 const useSound = () => {
   const ctxRef = useRef(null)
 
@@ -954,6 +978,13 @@ function Home({ pwa, background }) {
   return (
     <div className="app">
       <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <a href="#tests">Tests</a>
+        <Link to="/reaction-sprint">Reaction</Link>
+        <a href="#progress">Progress</a>
+        <a href="#plans">Plans</a>
+        <button className="ghost">Sign In</button>
+      </NavBar>
       <section id="tests" className="section">
         <div className="section-heading">
           <div>
@@ -1097,29 +1128,7 @@ function Home({ pwa, background }) {
         </div>
       </section>
 
-<header className="hero" id="top">
-        <nav className="nav">
-          <Link to="/" className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </Link>
-          <div className="nav-links">
-            <a href="#tests">Tests</a>
-            <Link to="/reaction-sprint">Reaction</Link>
-            <a href="#progress">Progress</a>
-            <a href="#plans">Plans</a>
-            <BackgroundPicker
-              background={background.background}
-              onChange={background.setBackground}
-            />
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-            <button className="ghost">Sign In</button>
-          </div>
-        </nav>
-
+      <header className="hero" id="top">
         <div className="hero-grid">
           <div className="hero-copy">
             <p className="eyebrow">⚡ Cognitive training for real life</p>
@@ -1362,25 +1371,11 @@ function ReactionSprintPage({ pwa, background }) {
   return (
     <div className="app">
       <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <Link to="/">Home</Link>
+        <Link to="/reaction-sprint">Reaction</Link>
+      </NavBar>
       <header className="hero">
-        <nav className="nav">
-          <Link to="/" className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </Link>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/reaction-sprint">Reaction</Link>
-            <BackgroundPicker
-              background={background.background}
-              onChange={background.setBackground}
-            />
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-          </div>
-        </nav>
         <div className="reaction-page" />
       </header>
 
@@ -1396,25 +1391,11 @@ function AimTrainerPage({ pwa, background }) {
   return (
     <div className="app">
       <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <Link to="/">Home</Link>
+        <Link to="/aim-trainer">Aim Trainer</Link>
+      </NavBar>
       <header className="hero">
-        <nav className="nav">
-          <Link to="/" className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </Link>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/aim-trainer">Aim Trainer</Link>
-            <BackgroundPicker
-              background={background.background}
-              onChange={background.setBackground}
-            />
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-          </div>
-        </nav>
         <div className="reaction-page" />
       </header>
 
@@ -1430,25 +1411,11 @@ function NumberMemoryPage({ pwa, background }) {
   return (
     <div className="app">
       <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <Link to="/">Home</Link>
+        <Link to="/number-memory">Number Memory</Link>
+      </NavBar>
       <header className="hero">
-        <nav className="nav">
-          <Link to="/" className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </Link>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/number-memory">Number Memory</Link>
-            <BackgroundPicker
-              background={background.background}
-              onChange={background.setBackground}
-            />
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-          </div>
-        </nav>
         <div className="reaction-page" />
       </header>
 
@@ -1464,25 +1431,11 @@ function VerbalMemoryPage({ pwa, background }) {
   return (
     <div className="app">
       <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <Link to="/">Home</Link>
+        <Link to="/verbal-memory">Verbal Memory</Link>
+      </NavBar>
       <header className="hero">
-        <nav className="nav">
-          <div className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </div>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/verbal-memory">Verbal Memory</Link>
-            <BackgroundPicker
-              background={background.background}
-              onChange={background.setBackground}
-            />
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-          </div>
-        </nav>
         <div className="reaction-page" />
       </header>
 
