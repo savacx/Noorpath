@@ -61,6 +61,10 @@
   overflow: hidden;
 }
 
+.site-header {
+  padding: 0 clamp(16px, 4vw, 40px);
+}
+
 .nav {
   display: flex;
   justify-content: space-between;
