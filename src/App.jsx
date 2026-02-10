@@ -358,6 +358,94 @@ const useNumberMemory = () => {
   }
 }
 
+const VERBAL_WORDS = [
+  'apple',
+  'river',
+  'planet',
+  'shadow',
+  'pencil',
+  'garden',
+  'window',
+  'silver',
+  'winter',
+  'coffee',
+  'mirror',
+  'galaxy',
+  'forest',
+  'puzzle',
+  'signal',
+  'marble',
+  'pocket',
+  'rocket',
+  'canvas',
+  'bottle',
+  'memory',
+  'storm',
+  'island',
+  'legend',
+  'castle',
+  'moment',
+  'bridge',
+  'future',
+  'crystal',
+  'sailor',
+]
+
+const useVerbalMemory = () => {
+  const [phase, setPhase] = useState('idle')
+  const [currentWord, setCurrentWord] = useState('')
+  const [seenWords, setSeenWords] = useState(new Set())
+  const [score, setScore] = useState(0)
+  const [best, setBest] = useState(0)
+
+  const pickWord = () => {
+    const next = VERBAL_WORDS[Math.floor(Math.random() * VERBAL_WORDS.length)]
+    setCurrentWord(next)
+  }
+
+  const start = () => {
+    setPhase('play')
+    setScore(0)
+    setSeenWords(new Set())
+    pickWord()
+  }
+
+  const markSeen = (isSeen) => {
+    if (phase !== 'play') {
+      return
+    }
+    const hasSeen = seenWords.has(currentWord)
+    if (hasSeen === isSeen) {
+      setScore((prev) => {
+        const next = prev + 1
+        setBest((bestPrev) => Math.max(bestPrev, next))
+        return next
+      })
+      setSeenWords((prev) => new Set(prev).add(currentWord))
+      pickWord()
+    } else {
+      setPhase('result')
+    }
+  }
+
+  const reset = () => {
+    setPhase('idle')
+    setScore(0)
+    setCurrentWord('')
+    setSeenWords(new Set())
+  }
+
+  return {
+    phase,
+    currentWord,
+    score,
+    best,
+    start,
+    markSeen,
+    reset,
+  }
+}
+
 function ReactionSprintSection({ reaction, showOpenLink }) {
   return (
     <section id="reaction" className="section reaction">
@@ -502,73 +590,151 @@ function AimTrainerSection({ aim }) {
 function NumberMemorySection({ memory }) {
   return (
     <section id="number-memory" className="section memory">
+      <div className="memory-stage">
+        <span className="memory-level">Level {memory.length}</span>
+        {memory.phase === 'show' && (
+          <>
+            <div className="memory-digit">{memory.currentDigit}</div>
+            <p className="memory-hint">Memorize this number...</p>
+          </>
+        )}
+        {memory.phase === 'idle' && (
+          <>
+            <div className="memory-icon">#</div>
+            <h2>Ready to challenge your brain?</h2>
+            <p>Test your number memory skills - how many digits can you remember?</p>
+            <button className="primary" onClick={memory.start}>
+              ▶ Start Level 1
+            </button>
+          </>
+        )}
+        {memory.phase === 'input' && (
+          <>
+            <h2>What was the number?</h2>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={memory.inputValue}
+              onChange={(event) =>
+                memory.setInputValue(event.target.value.replace(/\D/g, ''))
+              }
+              placeholder="Enter the number..."
+            />
+            <button className="primary" onClick={memory.submit}>
+              Submit Answer
+            </button>
+          </>
+        )}
+        {memory.phase === 'result' && (
+          <>
+            <h2>Nice try!</h2>
+            <p>Sequence was {memory.sequence}</p>
+            <button className="primary" onClick={memory.reset}>
+              Try Again
+            </button>
+          </>
+        )}
+      </div>
+      <div className="memory-install">
+        <div>
+          <h3># Install NeuroDash App</h3>
+          <p>Get faster access to brain training tests</p>
+        </div>
+        <div className="memory-install-actions">
+          <InstallButton canInstall={true} onInstall={() => {}} />
+          <span>Chrome/Edge - Wait...</span>
+        </div>
+      </div>
+      <div className="memory-info">
+        <h3>Number Memory</h3>
+        <p>Remember the number sequence and type it back.</p>
+        <p>
+          Test your numerical working memory by remembering increasingly long
+          sequences of digits. This evaluates your ability to temporarily hold
+          and manipulate numerical information - essential for mental math,
+          following instructions with numbers, and remembering phone numbers or codes.
+        </p>
+      </div>
+      <div className="memory-share">
+        <div>
+          <h4>Ready to challenge your brain?</h4>
+          <p>
+            How many digits can you remember? I just challenged my numerical memory
+            on Noorpath - think you can beat my score? 🧠✨
+          </p>
+        </div>
+        <button className="share-pill" type="button">
+          Share
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function VerbalMemorySection({ verbal }) {
+  return (
+    <section id="verbal-memory" className="section verbal">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">🔢 Number Memory</p>
-          <h2>Remember and recall sequences of numbers.</h2>
+          <p className="eyebrow">📝 Verbal Memory</p>
+          <h2>Test your ability to remember words and avoid repetition.</h2>
         </div>
-        <div className="memory-metrics">
+        <div className="verbal-metrics">
           <div>
-            <p className="stat-label">Level</p>
-            <h3>{memory.length}</h3>
+            <p className="stat-label">Score</p>
+            <h3>{verbal.score}</h3>
           </div>
           <div>
             <p className="stat-label">Best</p>
-            <h3>{memory.best}</h3>
+            <h3>{verbal.best}</h3>
           </div>
         </div>
       </div>
-      <div className="memory-grid">
-        <div className="memory-board">
-          {memory.phase === 'idle' && (
-            <div className="memory-state">
-              <h3>Ready?</h3>
-              <p>Memorize the numbers as they appear, then type them in.</p>
-              <button className="secondary" onClick={memory.start}>
+      <div className="verbal-grid">
+        <div className="verbal-board">
+          {verbal.phase === 'idle' && (
+            <div className="verbal-state">
+              <h3>Ready to challenge your memory?</h3>
+              <p>Decide if each word is NEW or SEEN.</p>
+              <button className="secondary" onClick={verbal.start}>
                 ▶ Start Test
               </button>
             </div>
           )}
-          {memory.phase === 'show' && (
-            <div className="memory-digit">{memory.currentDigit}</div>
+          {verbal.phase === 'play' && (
+            <>
+              <div className="verbal-word">{verbal.currentWord}</div>
+              <div className="verbal-actions">
+                <button className="ghost" onClick={() => verbal.markSeen(true)}>
+                  Seen
+                </button>
+                <button className="primary" onClick={() => verbal.markSeen(false)}>
+                  New
+                </button>
+              </div>
+            </>
           )}
-          {memory.phase === 'input' && (
-            <div className="memory-input">
-              <p>Enter the full sequence</p>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={memory.inputValue}
-                onChange={(event) =>
-                  memory.setInputValue(event.target.value.replace(/\D/g, ''))
-                }
-                placeholder="Type numbers"
-              />
-              <button className="primary" onClick={memory.submit}>
-                Submit
-              </button>
-            </div>
-          )}
-          {memory.phase === 'result' && (
-            <div className="memory-state">
+          {verbal.phase === 'result' && (
+            <div className="verbal-state">
               <h3>Nice try!</h3>
-              <p>Sequence was {memory.sequence}</p>
-              <button className="secondary" onClick={memory.reset}>
+              <p>Your score: {verbal.score}</p>
+              <button className="secondary" onClick={verbal.reset}>
                 Try Again
               </button>
             </div>
           )}
         </div>
-        <div className="memory-panel">
+        <div className="verbal-panel">
           <h3>How it works</h3>
           <p>
-            Each round adds one more digit. Enter the full sequence to level up.
+            If the word has appeared before, press Seen. If it is new, press New.
+            One mistake ends the round.
           </p>
-          <div className="memory-actions">
-            <button className="secondary" onClick={memory.start}>
+          <div className="verbal-actions">
+            <button className="secondary" onClick={verbal.start}>
               ▶ Start Test
             </button>
-            <button className="ghost" onClick={memory.reset}>
+            <button className="ghost" onClick={verbal.reset}>
               ♻ Reset
             </button>
           </div>
@@ -583,6 +749,7 @@ function Home({ pwa }) {
   const reaction = useReactionSprint()
   const aim = useAimTrainer()
   const memory = useNumberMemory()
+  const verbal = useVerbalMemory()
 
   const coreTests = [
     {
@@ -713,7 +880,8 @@ function Home({ pwa }) {
               className={`test-card ${
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
-                test.title === 'Number Memory'
+                test.title === 'Number Memory' ||
+                test.title === 'Verbal Memory'
                   ? 'clickable'
                   : ''
               }`}
@@ -727,18 +895,23 @@ function Home({ pwa }) {
                 if (test.title === 'Number Memory') {
                   navigate('/number-memory')
                 }
+                if (test.title === 'Verbal Memory') {
+                  navigate('/verbal-memory')
+                }
               }}
               role={
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
-                test.title === 'Number Memory'
+                test.title === 'Number Memory' ||
+                test.title === 'Verbal Memory'
                   ? 'button'
                   : undefined
               }
               tabIndex={
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
-                test.title === 'Number Memory'
+                test.title === 'Number Memory' ||
+                test.title === 'Verbal Memory'
                   ? 0
                   : undefined
               }
@@ -760,6 +933,12 @@ function Home({ pwa }) {
                   (event.key === 'Enter' || event.key === ' ')
                 ) {
                   navigate('/number-memory')
+                }
+                if (
+                  test.title === 'Verbal Memory' &&
+                  (event.key === 'Enter' || event.key === ' ')
+                ) {
+                  navigate('/verbal-memory')
                 }
               }}
             >
@@ -800,6 +979,14 @@ function Home({ pwa }) {
                     className="start-pill"
                     type="button"
                     onClick={() => navigate('/number-memory')}
+                  >
+                    Start Test
+                  </button>
+                ) : test.title === 'Verbal Memory' ? (
+                  <button
+                    className="start-pill"
+                    type="button"
+                    onClick={() => navigate('/verbal-memory')}
                   >
                     Start Test
                   </button>
@@ -900,6 +1087,7 @@ function Home({ pwa }) {
       <ReactionSprintSection reaction={reaction} showOpenLink />
       <AimTrainerSection aim={aim} />
       <NumberMemorySection memory={memory} />
+      <VerbalMemorySection verbal={verbal} />
 
       <section className="section alt">
         <div className="section-heading">
@@ -1152,6 +1340,35 @@ function NumberMemoryPage({ pwa }) {
   )
 }
 
+function VerbalMemoryPage({ pwa }) {
+  const verbal = useVerbalMemory()
+
+  return (
+    <div className="app">
+      <PromoBanner />
+      <header className="hero">
+        <nav className="nav">
+          <div className="brand">
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
+            <div>
+              <p className="brand-title">Noorpath</p>
+              <p className="brand-tag">Brain Test Studio</p>
+            </div>
+          </div>
+          <div className="nav-links">
+            <Link to="/">Home</Link>
+            <Link to="/verbal-memory">Verbal Memory</Link>
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
+          </div>
+        </nav>
+        <div className="reaction-page" />
+      </header>
+
+      <VerbalMemorySection verbal={verbal} />
+    </div>
+  )
+}
+
 function App() {
   const pwa = usePwaInstall()
 
@@ -1162,6 +1379,7 @@ function App() {
         <Route path="/reaction-sprint" element={<ReactionSprintPage pwa={pwa} />} />
         <Route path="/aim-trainer" element={<AimTrainerPage pwa={pwa} />} />
         <Route path="/number-memory" element={<NumberMemoryPage pwa={pwa} />} />
+        <Route path="/verbal-memory" element={<VerbalMemoryPage pwa={pwa} />} />
       </Routes>
     </BrowserRouter>
   )

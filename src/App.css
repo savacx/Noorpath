@@ -961,13 +961,99 @@
   position: relative;
 }
 
-.memory-grid {
+.memory-stage {
+  background: rgba(6, 6, 8, 0.9);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px;
+  text-align: center;
+  display: grid;
+  gap: 16px;
+}
+
+.memory-level {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #b9c3ff;
+  text-transform: uppercase;
+}
+
+.memory-icon {
+  font-size: 40px;
+  color: #6ea0ff;
+}
+
+.memory-digit {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: #6ea0ff;
+}
+
+.memory-hint {
+  color: var(--text-secondary);
+}
+
+.memory-stage input {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(100, 150, 255, 0.5);
+  background: rgba(18, 20, 32, 0.9);
+  color: #fff;
+  font-size: 16px;
+}
+
+.memory-install {
+  margin-top: 24px;
+  background: rgba(18, 22, 36, 0.9);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.memory-install-actions {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.memory-info {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.memory-info h3 {
+  color: #7c91ff;
+}
+
+.memory-share {
+  margin-top: 24px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: rgba(18, 22, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.verbal {
+  position: relative;
+}
+
+.verbal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
 }
 
-.memory-board {
+.verbal-board {
   min-height: 280px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -975,36 +1061,28 @@
   display: grid;
   place-items: center;
   padding: 24px;
-}
-
-.memory-state {
   text-align: center;
-  display: grid;
-  gap: 12px;
 }
 
-.memory-digit {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+.verbal-word {
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
-  color: #f6f3ff;
+  text-transform: capitalize;
 }
 
-.memory-input {
+.verbal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.verbal-state {
   display: grid;
   gap: 12px;
-  width: min(320px, 100%);
 }
 
-.memory-input input {
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(18, 20, 32, 0.9);
-  color: #fff;
-  font-size: 16px;
-}
-
-.memory-panel {
+.verbal-panel {
   background: rgba(18, 20, 32, 0.85);
   border-radius: 22px;
   padding: 24px;
@@ -1013,15 +1091,9 @@
   gap: 16px;
 }
 
-.memory-metrics {
+.verbal-metrics {
   display: flex;
   gap: 24px;
-  flex-wrap: wrap;
-}
-
-.memory-actions {
-  display: flex;
-  gap: 12px;
   flex-wrap: wrap;
 }
 
