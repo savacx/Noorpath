@@ -5,6 +5,7 @@
     radial-gradient(circle at 20% 20%, rgba(255, 206, 120, 0.12), transparent 35%),
     radial-gradient(circle at 80% 30%, rgba(120, 112, 255, 0.2), transparent 35%),
     var(--surface);
+  padding-top: 78px;
 }
 
 .promo-banner {
@@ -67,6 +68,19 @@
   align-items: center;
   gap: 24px;
   margin-bottom: 56px;
+}
+
+.nav-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 14px clamp(20px, 6vw, 88px);
+  background: rgba(10, 12, 20, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 1000;
+  margin-bottom: 0;
 }
 
 .brand {

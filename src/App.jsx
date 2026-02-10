@@ -94,7 +94,45 @@ function InstallButton({ canInstall, onInstall }) {
   )
 }
 
-const useReactionSprint = () => {
+const useSound = () => {
+  const ctxRef = useRef(null)
+
+  const ensureContext = () => {
+    if (!ctxRef.current) {
+      ctxRef.current = new (window.AudioContext || window.webkitAudioContext)()
+    }
+    if (ctxRef.current.state === 'suspended') {
+      ctxRef.current.resume()
+    }
+    return ctxRef.current
+  }
+
+  const playTone = (frequency = 440, duration = 0.12, type = 'sine') => {
+    try {
+      const ctx = ensureContext()
+      const oscillator = ctx.createOscillator()
+      const gain = ctx.createGain()
+      oscillator.type = type
+      oscillator.frequency.value = frequency
+      gain.gain.value = 0.12
+      oscillator.connect(gain)
+      gain.connect(ctx.destination)
+      oscillator.start()
+      oscillator.stop(ctx.currentTime + duration)
+    } catch {
+      // Ignore audio errors
+    }
+  }
+
+  return {
+    hit: () => playTone(660, 0.08, 'triangle'),
+    miss: () => playTone(180, 0.14, 'sawtooth'),
+    correct: () => playTone(520, 0.12, 'sine'),
+    wrong: () => playTone(140, 0.18, 'square'),
+  }
+}
+
+const useReactionSprint = (sound) => {
   const [phase, setPhase] = useState('idle')
   const [lastTime, setLastTime] = useState(null)
   const [bestTime, setBestTime] = useState(null)
@@ -131,6 +169,7 @@ const useReactionSprint = () => {
       return next
     })
     setPhase('result')
+    sound?.correct?.()
   }
 
   const handleReactionPad = () => {
@@ -143,6 +182,7 @@ const useReactionSprint = () => {
         clearTimeout(timerRef.current)
       }
       setPhase('too-soon')
+      sound?.wrong?.()
       return
     }
     if (phase === 'ready') {
@@ -175,7 +215,7 @@ const useReactionSprint = () => {
   }
 }
 
-const useAimTrainer = () => {
+const useAimTrainer = (sound) => {
   const [running, setRunning] = useState(false)
   const [score, setScore] = useState(0)
   const [misses, setMisses] = useState(0)
@@ -248,6 +288,7 @@ const useAimTrainer = () => {
     }
     setScore((prev) => prev + 1)
     spawnTarget()
+    sound?.hit?.()
   }
 
   const miss = () => {
@@ -256,6 +297,7 @@ const useAimTrainer = () => {
     }
     setMisses((prev) => prev + 1)
     spawnTarget()
+    sound?.miss?.()
   }
 
   return {
@@ -272,7 +314,7 @@ const useAimTrainer = () => {
   }
 }
 
-const useNumberMemory = () => {
+const useNumberMemory = (sound) => {
   const [phase, setPhase] = useState('idle')
   const [sequence, setSequence] = useState([])
   const [inputValue, setInputValue] = useState('')
@@ -328,8 +370,10 @@ const useNumberMemory = () => {
       setSequence(nextSequence)
       setInputValue('')
       showSequence(nextSequence)
+      sound?.correct?.()
     } else {
       setPhase('result')
+      sound?.wrong?.()
     }
   }
 
@@ -391,12 +435,13 @@ const VERBAL_WORDS = [
   'sailor',
 ]
 
-const useVerbalMemory = () => {
+const useVerbalMemory = (sound) => {
   const [phase, setPhase] = useState('idle')
   const [currentWord, setCurrentWord] = useState('')
   const [seenWords, setSeenWords] = useState(new Set())
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(0)
+  const [lives, setLives] = useState(3)
 
   const pickWord = () => {
     const next = VERBAL_WORDS[Math.floor(Math.random() * VERBAL_WORDS.length)]
@@ -406,6 +451,7 @@ const useVerbalMemory = () => {
   const start = () => {
     setPhase('play')
     setScore(0)
+    setLives(3)
     setSeenWords(new Set())
     pickWord()
   }
@@ -423,14 +469,24 @@ const useVerbalMemory = () => {
       })
       setSeenWords((prev) => new Set(prev).add(currentWord))
       pickWord()
+      sound?.correct?.()
     } else {
-      setPhase('result')
+      setLives((prev) => {
+        const next = prev - 1
+        if (next <= 0) {
+          setPhase('result')
+          return 0
+        }
+        return next
+      })
+      sound?.wrong?.()
     }
   }
 
   const reset = () => {
     setPhase('idle')
     setScore(0)
+    setLives(3)
     setCurrentWord('')
     setSeenWords(new Set())
   }
@@ -440,6 +496,7 @@ const useVerbalMemory = () => {
     currentWord,
     score,
     best,
+    lives,
     start,
     markSeen,
     reset,
@@ -688,6 +745,10 @@ function VerbalMemorySection({ verbal }) {
             <p className="stat-label">Best</p>
             <h3>{verbal.best}</h3>
           </div>
+          <div>
+            <p className="stat-label">Lives</p>
+            <h3>{verbal.lives}</h3>
+          </div>
         </div>
       </div>
       <div className="verbal-grid">
@@ -746,10 +807,11 @@ function VerbalMemorySection({ verbal }) {
 
 function Home({ pwa }) {
   const navigate = useNavigate()
-  const reaction = useReactionSprint()
-  const aim = useAimTrainer()
-  const memory = useNumberMemory()
-  const verbal = useVerbalMemory()
+  const sound = useSound()
+  const reaction = useReactionSprint(sound)
+  const aim = useAimTrainer(sound)
+  const memory = useNumberMemory(sound)
+  const verbal = useVerbalMemory(sound)
 
   const coreTests = [
     {
@@ -858,6 +920,87 @@ function Home({ pwa }) {
   return (
     <div className="app">
       <PromoBanner />
+      <header className="hero" id="top">
+        <nav className="nav nav-fixed">
+          <div className="brand">
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
+            <div>
+              <p className="brand-title">Noorpath</p>
+              <p className="brand-tag">Brain Test Studio</p>
+            </div>
+          </div>
+          <div className="nav-links">
+            <a href="#tests">Tests</a>
+            <Link to="/reaction-sprint">Reaction</Link>
+            <a href="#progress">Progress</a>
+            <a href="#plans">Plans</a>
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
+            <button className="ghost">Sign In</button>
+          </div>
+        </nav>
+
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <p className="eyebrow">⚡ Cognitive training for real life</p>
+            <div className="hero-logo-wrap">
+              <img className="hero-logo" src={logo} alt="Noorpath logo" />
+            </div>
+            <h1>BrainTests Multiplayer for focus, memory, and speed.</h1>
+            <p className="lead">
+              Noorpath blends multiplayer brain tests, adaptive challenges, and
+              progress insights so you can train clarity, memory, and speed in just
+              a few minutes a day.
+            </p>
+            <div className="hero-actions">
+              <button className="primary">🚀 Start a Free Session</button>
+              <button className="secondary">🧠 Explore Test Library</button>
+            </div>
+            <div className="hero-metrics">
+              <div>
+                <h3>8</h3>
+                <p>🧩 Core test types</p>
+              </div>
+              <div>
+                <h3>12 min</h3>
+                <p>⏱ Average session</p>
+              </div>
+              <div>
+                <h3>98%</h3>
+                <p>✅ Completion rate</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-card">
+            <div className="hero-card-header">
+              <p className="card-title">🎯 Today's Focus Path</p>
+              <span className="pill">Personalized</span>
+            </div>
+            <div className="hero-card-body">
+              <div className="mini-row">
+                <span className="mini-title">Warm-up</span>
+                <span className="mini-value">Reaction Time - 2 min</span>
+              </div>
+              <div className="mini-row">
+                <span className="mini-title">Core Block</span>
+                <span className="mini-value">Pattern Grid - 4 min</span>
+              </div>
+              <div className="mini-row">
+                <span className="mini-title">Challenge</span>
+                <span className="mini-value">Logic Pulse - 6 min</span>
+              </div>
+              <div className="progress">
+                <div className="progress-track">
+                  <div className="progress-fill" />
+                </div>
+                <p>Weekly goal: 3 of 5 sessions completed</p>
+              </div>
+              <button className="primary full">▶ Resume Session</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <section id="tests" className="section">
         <div className="section-heading">
           <div>
@@ -1000,87 +1143,6 @@ function Home({ pwa }) {
           ))}
         </div>
       </section>
-
-<header className="hero" id="top">
-        <nav className="nav">
-          <div className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </div>
-          <div className="nav-links">
-            <a href="#tests">Tests</a>
-            <Link to="/reaction-sprint">Reaction</Link>
-            <a href="#progress">Progress</a>
-            <a href="#plans">Plans</a>
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-            <button className="ghost">Sign In</button>
-          </div>
-        </nav>
-
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">⚡ Cognitive training for real life</p>
-            <div className="hero-logo-wrap">
-              <img className="hero-logo" src={logo} alt="Noorpath logo" />
-            </div>
-            <h1>BrainTests Multiplayer for focus, memory, and speed.</h1>
-            <p className="lead">
-              Noorpath blends multiplayer brain tests, adaptive challenges, and
-              progress insights so you can train clarity, memory, and speed in just
-              a few minutes a day.
-            </p>
-            <div className="hero-actions">
-              <button className="primary">🚀 Start a Free Session</button>
-              <button className="secondary">🧠 Explore Test Library</button>
-            </div>
-            <div className="hero-metrics">
-              <div>
-                <h3>8</h3>
-                <p>🧩 Core test types</p>
-              </div>
-              <div>
-                <h3>12 min</h3>
-                <p>⏱ Average session</p>
-              </div>
-              <div>
-                <h3>98%</h3>
-                <p>✅ Completion rate</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-card">
-            <div className="hero-card-header">
-              <p className="card-title">🎯 Today's Focus Path</p>
-              <span className="pill">Personalized</span>
-            </div>
-            <div className="hero-card-body">
-              <div className="mini-row">
-                <span className="mini-title">Warm-up</span>
-                <span className="mini-value">Reaction Time - 2 min</span>
-              </div>
-              <div className="mini-row">
-                <span className="mini-title">Core Block</span>
-                <span className="mini-value">Pattern Grid - 4 min</span>
-              </div>
-              <div className="mini-row">
-                <span className="mini-title">Challenge</span>
-                <span className="mini-value">Logic Pulse - 6 min</span>
-              </div>
-              <div className="progress">
-                <div className="progress-track">
-                  <div className="progress-fill" />
-                </div>
-                <p>Weekly goal: 3 of 5 sessions completed</p>
-              </div>
-              <button className="primary full">▶ Resume Session</button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       
 
@@ -1254,13 +1316,14 @@ function Home({ pwa }) {
 }
 
 function ReactionSprintPage({ pwa }) {
-  const reaction = useReactionSprint()
+  const sound = useSound()
+  const reaction = useReactionSprint(sound)
 
   return (
     <div className="app">
       <PromoBanner />
       <header className="hero">
-        <nav className="nav">
+        <nav className="nav nav-fixed">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
@@ -1283,13 +1346,14 @@ function ReactionSprintPage({ pwa }) {
 }
 
 function AimTrainerPage({ pwa }) {
-  const aim = useAimTrainer()
+  const sound = useSound()
+  const aim = useAimTrainer(sound)
 
   return (
     <div className="app">
       <PromoBanner />
       <header className="hero">
-        <nav className="nav">
+        <nav className="nav nav-fixed">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
@@ -1312,13 +1376,14 @@ function AimTrainerPage({ pwa }) {
 }
 
 function NumberMemoryPage({ pwa }) {
-  const memory = useNumberMemory()
+  const sound = useSound()
+  const memory = useNumberMemory(sound)
 
   return (
     <div className="app">
       <PromoBanner />
       <header className="hero">
-        <nav className="nav">
+        <nav className="nav nav-fixed">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
@@ -1341,7 +1406,8 @@ function NumberMemoryPage({ pwa }) {
 }
 
 function VerbalMemoryPage({ pwa }) {
-  const verbal = useVerbalMemory()
+  const sound = useSound()
+  const verbal = useVerbalMemory(sound)
 
   return (
     <div className="app">
