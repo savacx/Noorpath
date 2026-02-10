@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes, useNavigate } from 'react-router-dom'
+import logo from './assets/logo.png'
 import './App.css'
 
 function PromoBanner() {
@@ -251,6 +252,7 @@ function Home() {
       title: 'Audio Thread',
       description: 'Match tones, rhythm, and spoken phrases with accuracy.',
       level: 'Medium',
+      duration: '3 min',
     },
     {
       title: 'Pattern Shift',
@@ -265,7 +267,7 @@ function Home() {
       <header className="hero" id="top">
         <nav className="nav">
           <div className="brand">
-            <span className="brand-mark">N</span>
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
               <p className="brand-title">Noorpath</p>
               <p className="brand-tag">Brain Test Studio</p>
@@ -283,6 +285,9 @@ function Home() {
         <div className="hero-grid">
           <div className="hero-copy">
             <p className="eyebrow">⚡ Cognitive training for real life</p>
+            <div className="hero-logo-wrap">
+              <img className="hero-logo" src={logo} alt="Noorpath logo" />
+            </div>
             <h1>Build sharper focus with guided brain tests.</h1>
             <p className="lead">
               Noorpath blends micro-tests, adaptive challenges, and progress insights
@@ -574,7 +579,7 @@ function ReactionSprintPage() {
       <header className="hero">
         <nav className="nav">
           <div className="brand">
-            <span className="brand-mark">N</span>
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
               <p className="brand-title">Noorpath</p>
               <p className="brand-tag">Brain Test Studio</p>
