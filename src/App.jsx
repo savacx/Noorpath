@@ -272,6 +272,92 @@ const useAimTrainer = () => {
   }
 }
 
+const useNumberMemory = () => {
+  const [phase, setPhase] = useState('idle')
+  const [sequence, setSequence] = useState([])
+  const [inputValue, setInputValue] = useState('')
+  const [length, setLength] = useState(1)
+  const [best, setBest] = useState(1)
+  const [currentDigit, setCurrentDigit] = useState('')
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
+
+  const buildSequence = (size) =>
+    Array.from({ length: size }, () => Math.floor(Math.random() * 10)).join('')
+
+  const showSequence = (nextSequence) => {
+    setPhase('show')
+    setCurrentDigit('')
+    let index = 0
+    const showNext = () => {
+      if (index >= nextSequence.length) {
+        setCurrentDigit('')
+        setPhase('input')
+        return
+      }
+      setCurrentDigit(nextSequence[index])
+      index += 1
+      timerRef.current = setTimeout(showNext, 700)
+    }
+    timerRef.current = setTimeout(showNext, 600)
+  }
+
+  const start = () => {
+    const nextSequence = buildSequence(length)
+    setSequence(nextSequence)
+    setInputValue('')
+    showSequence(nextSequence)
+  }
+
+  const submit = () => {
+    if (phase !== 'input') {
+      return
+    }
+    if (inputValue === sequence) {
+      const nextLength = length + 1
+      setLength(nextLength)
+      setBest((prev) => Math.max(prev, nextLength))
+      const nextSequence = buildSequence(nextLength)
+      setSequence(nextSequence)
+      setInputValue('')
+      showSequence(nextSequence)
+    } else {
+      setPhase('result')
+    }
+  }
+
+  const reset = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    setPhase('idle')
+    setSequence([])
+    setInputValue('')
+    setLength(1)
+    setCurrentDigit('')
+  }
+
+  return {
+    phase,
+    sequence,
+    inputValue,
+    setInputValue,
+    length,
+    best,
+    currentDigit,
+    start,
+    submit,
+    reset,
+  }
+}
+
 function ReactionSprintSection({ reaction, showOpenLink }) {
   return (
     <section id="reaction" className="section reaction">
@@ -413,10 +499,90 @@ function AimTrainerSection({ aim }) {
   )
 }
 
+function NumberMemorySection({ memory }) {
+  return (
+    <section id="number-memory" className="section memory">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">🔢 Number Memory</p>
+          <h2>Remember and recall sequences of numbers.</h2>
+        </div>
+        <div className="memory-metrics">
+          <div>
+            <p className="stat-label">Level</p>
+            <h3>{memory.length}</h3>
+          </div>
+          <div>
+            <p className="stat-label">Best</p>
+            <h3>{memory.best}</h3>
+          </div>
+        </div>
+      </div>
+      <div className="memory-grid">
+        <div className="memory-board">
+          {memory.phase === 'idle' && (
+            <div className="memory-state">
+              <h3>Ready?</h3>
+              <p>Memorize the numbers as they appear, then type them in.</p>
+              <button className="secondary" onClick={memory.start}>
+                ▶ Start Test
+              </button>
+            </div>
+          )}
+          {memory.phase === 'show' && (
+            <div className="memory-digit">{memory.currentDigit}</div>
+          )}
+          {memory.phase === 'input' && (
+            <div className="memory-input">
+              <p>Enter the full sequence</p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={memory.inputValue}
+                onChange={(event) =>
+                  memory.setInputValue(event.target.value.replace(/\D/g, ''))
+                }
+                placeholder="Type numbers"
+              />
+              <button className="primary" onClick={memory.submit}>
+                Submit
+              </button>
+            </div>
+          )}
+          {memory.phase === 'result' && (
+            <div className="memory-state">
+              <h3>Nice try!</h3>
+              <p>Sequence was {memory.sequence}</p>
+              <button className="secondary" onClick={memory.reset}>
+                Try Again
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="memory-panel">
+          <h3>How it works</h3>
+          <p>
+            Each round adds one more digit. Enter the full sequence to level up.
+          </p>
+          <div className="memory-actions">
+            <button className="secondary" onClick={memory.start}>
+              ▶ Start Test
+            </button>
+            <button className="ghost" onClick={memory.reset}>
+              ♻ Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Home({ pwa }) {
   const navigate = useNavigate()
   const reaction = useReactionSprint()
   const aim = useAimTrainer()
+  const memory = useNumberMemory()
 
   const coreTests = [
     {
@@ -545,7 +711,9 @@ function Home({ pwa }) {
             <article
               key={test.title}
               className={`test-card ${
-                test.title === 'Reaction Time' || test.title === 'Aim Trainer'
+                test.title === 'Reaction Time' ||
+                test.title === 'Aim Trainer' ||
+                test.title === 'Number Memory'
                   ? 'clickable'
                   : ''
               }`}
@@ -556,14 +724,21 @@ function Home({ pwa }) {
                 if (test.title === 'Aim Trainer') {
                   navigate('/aim-trainer')
                 }
+                if (test.title === 'Number Memory') {
+                  navigate('/number-memory')
+                }
               }}
               role={
-                test.title === 'Reaction Time' || test.title === 'Aim Trainer'
+                test.title === 'Reaction Time' ||
+                test.title === 'Aim Trainer' ||
+                test.title === 'Number Memory'
                   ? 'button'
                   : undefined
               }
               tabIndex={
-                test.title === 'Reaction Time' || test.title === 'Aim Trainer'
+                test.title === 'Reaction Time' ||
+                test.title === 'Aim Trainer' ||
+                test.title === 'Number Memory'
                   ? 0
                   : undefined
               }
@@ -579,6 +754,12 @@ function Home({ pwa }) {
                   (event.key === 'Enter' || event.key === ' ')
                 ) {
                   navigate('/aim-trainer')
+                }
+                if (
+                  test.title === 'Number Memory' &&
+                  (event.key === 'Enter' || event.key === ' ')
+                ) {
+                  navigate('/number-memory')
                 }
               }}
             >
@@ -611,6 +792,14 @@ function Home({ pwa }) {
                     className="start-pill"
                     type="button"
                     onClick={() => navigate('/aim-trainer')}
+                  >
+                    Start Test
+                  </button>
+                ) : test.title === 'Number Memory' ? (
+                  <button
+                    className="start-pill"
+                    type="button"
+                    onClick={() => navigate('/number-memory')}
                   >
                     Start Test
                   </button>
@@ -710,6 +899,7 @@ function Home({ pwa }) {
 
       <ReactionSprintSection reaction={reaction} showOpenLink />
       <AimTrainerSection aim={aim} />
+      <NumberMemorySection memory={memory} />
 
       <section className="section alt">
         <div className="section-heading">
@@ -933,6 +1123,35 @@ function AimTrainerPage({ pwa }) {
   )
 }
 
+function NumberMemoryPage({ pwa }) {
+  const memory = useNumberMemory()
+
+  return (
+    <div className="app">
+      <PromoBanner />
+      <header className="hero">
+        <nav className="nav">
+          <div className="brand">
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
+            <div>
+              <p className="brand-title">Noorpath</p>
+              <p className="brand-tag">Brain Test Studio</p>
+            </div>
+          </div>
+          <div className="nav-links">
+            <Link to="/">Home</Link>
+            <Link to="/number-memory">Number Memory</Link>
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
+          </div>
+        </nav>
+        <div className="reaction-page" />
+      </header>
+
+      <NumberMemorySection memory={memory} />
+    </div>
+  )
+}
+
 function App() {
   const pwa = usePwaInstall()
 
@@ -942,6 +1161,7 @@ function App() {
         <Route path="/" element={<Home pwa={pwa} />} />
         <Route path="/reaction-sprint" element={<ReactionSprintPage pwa={pwa} />} />
         <Route path="/aim-trainer" element={<AimTrainerPage pwa={pwa} />} />
+        <Route path="/number-memory" element={<NumberMemoryPage pwa={pwa} />} />
       </Routes>
     </BrowserRouter>
   )
