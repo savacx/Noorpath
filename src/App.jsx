@@ -554,6 +554,83 @@ const useVerbalMemory = (sound) => {
   }
 }
 
+const useVisualMemory = (sound) => {
+  const [phase, setPhase] = useState('idle')
+  const [gridSize, setGridSize] = useState(3)
+  const [grid, setGrid] = useState(Array.from({ length: gridSize * gridSize }, (_, i) => i))
+  const [highlighted, setHighlighted] = useState([])
+  const [userSelections, setUserSelections] = useState([])
+  const [level, setLevel] = useState(1)
+  const [best, setBest] = useState(0)
+  const [lives, setLives] = useState(3)
+
+  const generateHighlighted = (num) => {
+    const highlights = []
+    while (highlights.length < num) {
+      const rand = Math.floor(Math.random() * (gridSize * gridSize))
+      if (!highlights.includes(rand)) highlights.push(rand)
+    }
+    return highlights
+  }
+
+  const start = () => {
+    const numToHighlight = Math.min(level + 1, gridSize * gridSize)
+    const highlights = generateHighlighted(numToHighlight)
+    setHighlighted(highlights)
+    setUserSelections([])
+    setPhase('show')
+    setTimeout(() => setPhase('input'), 2000 + level * 500)
+  }
+
+  const handleClick = (index) => {
+    if (phase !== 'input') return
+    if (userSelections.includes(index)) return
+    const newSelections = [...userSelections, index]
+    setUserSelections(newSelections)
+    if (newSelections.length === highlighted.length) {
+      const correct = newSelections.every(sel => highlighted.includes(sel)) &&
+                      highlighted.every(h => newSelections.includes(h))
+      if (correct) {
+        setLevel(l => l + 1)
+        setBest(b => Math.max(b, level))
+        setPhase('result')
+        sound?.correct?.()
+      } else {
+        setLives(l => {
+          const next = l - 1
+          if (next <= 0) {
+            setPhase('result')
+            return 0
+          }
+          return next
+        })
+        sound?.wrong?.()
+      }
+    }
+  }
+
+  const reset = () => {
+    setPhase('idle')
+    setLevel(1)
+    setLives(3)
+    setHighlighted([])
+    setUserSelections([])
+  }
+
+  return {
+    phase,
+    grid,
+    highlighted,
+    userSelections,
+    level,
+    best,
+    lives,
+    start,
+    handleClick,
+    reset,
+  }
+}
+
 function ReactionSprintSection({ reaction, showOpenLink }) {
   return (
     <section id="reaction" className="section reaction">
@@ -863,6 +940,91 @@ function VerbalMemorySection({ verbal }) {
   )
 }
 
+function VisualMemorySection({ visual }) {
+  return (
+    <section id="visual-memory" className="section visual">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">👁️ Visual Memory</p>
+          <h2>Remember patterns and spatial arrangements.</h2>
+        </div>
+        <div className="visual-metrics">
+          <div>
+            <p className="stat-label">Level</p>
+            <h3>{visual.level}</h3>
+          </div>
+          <div>
+            <p className="stat-label">Best</p>
+            <h3>{visual.best}</h3>
+          </div>
+          <div>
+            <p className="stat-label">Lives</p>
+            <h3>{visual.lives}</h3>
+          </div>
+        </div>
+      </div>
+      <div className="visual-grid">
+        <div className="visual-board">
+          {visual.phase === 'idle' && (
+            <div className="visual-state">
+              <h3>Ready to challenge your visual memory?</h3>
+              <p>Watch the pattern and click the highlighted squares.</p>
+              <button className="secondary" onClick={visual.start}>
+                ▶ Start Test
+              </button>
+            </div>
+          )}
+          {visual.phase === 'show' && (
+            <div className="visual-grid-container">
+              {visual.grid.map((_, index) => (
+                <div
+                  key={index}
+                  className={`visual-cell ${visual.highlighted.includes(index) ? 'highlighted' : ''}`}
+                />
+              ))}
+            </div>
+          )}
+          {visual.phase === 'input' && (
+            <div className="visual-grid-container">
+              {visual.grid.map((_, index) => (
+                <button
+                  key={index}
+                  className={`visual-cell ${visual.userSelections.includes(index) ? 'selected' : ''}`}
+                  onClick={() => visual.handleClick(index)}
+                />
+              ))}
+            </div>
+          )}
+          {visual.phase === 'result' && (
+            <div className="visual-state">
+              <h3>{visual.lives > 0 ? 'Great job!' : 'Nice try!'}</h3>
+              <p>Level reached: {visual.level}</p>
+              <button className="secondary" onClick={visual.reset}>
+                Try Again
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="visual-panel">
+          <h3>How it works</h3>
+          <p>
+            Watch the squares that light up, then click them in the same order.
+            The pattern gets longer each level.
+          </p>
+          <div className="visual-actions">
+            <button className="secondary" onClick={visual.start}>
+              ▶ Start Test
+            </button>
+            <button className="ghost" onClick={visual.reset}>
+              ♻ Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Home({ pwa, background }) {
   const navigate = useNavigate()
   const sound = useSound()
@@ -870,6 +1032,7 @@ function Home({ pwa, background }) {
   const aim = useAimTrainer(sound)
   const memory = useNumberMemory(sound)
   const verbal = useVerbalMemory(sound)
+  const visual = useVisualMemory(sound)
 
   const coreTests = [
     {
@@ -1025,12 +1188,16 @@ function Home({ pwa, background }) {
                 if (test.title === 'Verbal Memory') {
                   navigate('/verbal-memory')
                 }
+                if (test.title === 'Visual Memory') {
+                  navigate('/visual-memory')
+                }
               }}
               role={
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
                 test.title === 'Number Memory' ||
-                test.title === 'Verbal Memory'
+                test.title === 'Verbal Memory' ||
+                test.title === 'Visual Memory'
                   ? 'button'
                   : undefined
               }
@@ -1038,7 +1205,8 @@ function Home({ pwa, background }) {
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
                 test.title === 'Number Memory' ||
-                test.title === 'Verbal Memory'
+                test.title === 'Verbal Memory' ||
+                test.title === 'Visual Memory'
                   ? 0
                   : undefined
               }
@@ -1066,6 +1234,12 @@ function Home({ pwa, background }) {
                   (event.key === 'Enter' || event.key === ' ')
                 ) {
                   navigate('/verbal-memory')
+                }
+                if (
+                  test.title === 'Visual Memory' &&
+                  (event.key === 'Enter' || event.key === ' ')
+                ) {
+                  navigate('/visual-memory')
                 }
               }}
             >
@@ -1114,6 +1288,14 @@ function Home({ pwa, background }) {
                     className="start-pill"
                     type="button"
                     onClick={() => navigate('/verbal-memory')}
+                  >
+                    Start Test
+                  </button>
+                ) : test.title === 'Visual Memory' ? (
+                  <button
+                    className="start-pill"
+                    type="button"
+                    onClick={() => navigate('/visual-memory')}
                   >
                     Start Test
                   </button>
@@ -1199,6 +1381,7 @@ function Home({ pwa, background }) {
       <AimTrainerSection aim={aim} />
       <NumberMemorySection memory={memory} />
       <VerbalMemorySection verbal={verbal} />
+      <VisualMemorySection visual={visual} />
 
       <section className="section alt">
         <div className="section-heading">
@@ -1444,6 +1627,26 @@ function VerbalMemoryPage({ pwa, background }) {
   )
 }
 
+function VisualMemoryPage({ pwa, background }) {
+  const sound = useSound()
+  const visual = useVisualMemory(sound)
+
+  return (
+    <div className="app">
+      <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <Link to="/">Home</Link>
+        <Link to="/visual-memory">Visual Memory</Link>
+      </NavBar>
+      <header className="hero">
+        <div className="reaction-page" />
+      </header>
+
+      <VisualMemorySection visual={visual} />
+    </div>
+  )
+}
+
 function App() {
   const pwa = usePwaInstall()
   const background = useBackground()
@@ -1467,6 +1670,10 @@ function App() {
         <Route
           path="/verbal-memory"
           element={<VerbalMemoryPage pwa={pwa} background={background} />}
+        />
+        <Route
+          path="/visual-memory"
+          element={<VisualMemoryPage pwa={pwa} background={background} />}
         />
       </Routes>
     </BrowserRouter>
