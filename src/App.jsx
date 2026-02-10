@@ -955,7 +955,7 @@ function Home({ pwa, background }) {
     <div className="app">
       <PromoBanner />
       <header className="hero" id="top">
-        <nav className="nav nav-fixed">
+        <nav className="nav">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
@@ -1361,7 +1361,7 @@ function ReactionSprintPage({ pwa, background }) {
     <div className="app">
       <PromoBanner />
       <header className="hero">
-        <nav className="nav nav-fixed">
+        <nav className="nav">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
@@ -1395,7 +1395,7 @@ function AimTrainerPage({ pwa, background }) {
     <div className="app">
       <PromoBanner />
       <header className="hero">
-        <nav className="nav nav-fixed">
+        <nav className="nav">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
@@ -1429,7 +1429,7 @@ function NumberMemoryPage({ pwa, background }) {
     <div className="app">
       <PromoBanner />
       <header className="hero">
-        <nav className="nav nav-fixed">
+        <nav className="nav">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
