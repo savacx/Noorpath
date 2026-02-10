@@ -33,6 +33,28 @@ body {
   background-attachment: fixed;
 }
 
+body[data-bg='grid'] {
+  background-image:
+    radial-gradient(rgba(12, 14, 24, 0.9), rgba(12, 14, 24, 0.9)),
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: cover, 28px 28px, 28px 28px;
+}
+
+body[data-bg='nebula'] {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(120, 112, 255, 0.35), transparent 55%),
+    radial-gradient(circle at 80% 30%, rgba(96, 197, 255, 0.28), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(255, 140, 40, 0.18), transparent 45%),
+    #0b0d16;
+  background-size: cover;
+}
+
+body[data-bg='dark'] {
+  background-image: none;
+  background-color: #0b0d16;
+}
+
 a {
   text-decoration: none;
   color: inherit;

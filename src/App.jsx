@@ -94,6 +94,33 @@ function InstallButton({ canInstall, onInstall }) {
   )
 }
 
+const useBackground = () => {
+  const [background, setBackground] = useState('doodle')
+
+  useEffect(() => {
+    document.body.dataset.bg = background
+  }, [background])
+
+  return { background, setBackground }
+}
+
+function BackgroundPicker({ background, onChange }) {
+  return (
+    <label className="background-picker">
+      <span>Background</span>
+      <select
+        value={background}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="doodle">Doodle</option>
+        <option value="grid">Grid</option>
+        <option value="nebula">Nebula</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+  )
+}
+
 const useSound = () => {
   const ctxRef = useRef(null)
 
@@ -805,7 +832,7 @@ function VerbalMemorySection({ verbal }) {
   )
 }
 
-function Home({ pwa }) {
+function Home({ pwa, background }) {
   const navigate = useNavigate()
   const sound = useSound()
   const reaction = useReactionSprint(sound)
@@ -934,6 +961,10 @@ function Home({ pwa }) {
             <Link to="/reaction-sprint">Reaction</Link>
             <a href="#progress">Progress</a>
             <a href="#plans">Plans</a>
+            <BackgroundPicker
+              background={background.background}
+              onChange={background.setBackground}
+            />
             <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
             <button className="ghost">Sign In</button>
           </div>
@@ -1315,7 +1346,7 @@ function Home({ pwa }) {
   )
 }
 
-function ReactionSprintPage({ pwa }) {
+function ReactionSprintPage({ pwa, background }) {
   const sound = useSound()
   const reaction = useReactionSprint(sound)
 
@@ -1334,6 +1365,10 @@ function ReactionSprintPage({ pwa }) {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/reaction-sprint">Reaction</Link>
+            <BackgroundPicker
+              background={background.background}
+              onChange={background.setBackground}
+            />
             <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
           </div>
         </nav>
@@ -1345,7 +1380,7 @@ function ReactionSprintPage({ pwa }) {
   )
 }
 
-function AimTrainerPage({ pwa }) {
+function AimTrainerPage({ pwa, background }) {
   const sound = useSound()
   const aim = useAimTrainer(sound)
 
@@ -1364,6 +1399,10 @@ function AimTrainerPage({ pwa }) {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/aim-trainer">Aim Trainer</Link>
+            <BackgroundPicker
+              background={background.background}
+              onChange={background.setBackground}
+            />
             <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
           </div>
         </nav>
@@ -1375,7 +1414,7 @@ function AimTrainerPage({ pwa }) {
   )
 }
 
-function NumberMemoryPage({ pwa }) {
+function NumberMemoryPage({ pwa, background }) {
   const sound = useSound()
   const memory = useNumberMemory(sound)
 
@@ -1394,6 +1433,10 @@ function NumberMemoryPage({ pwa }) {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/number-memory">Number Memory</Link>
+            <BackgroundPicker
+              background={background.background}
+              onChange={background.setBackground}
+            />
             <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
           </div>
         </nav>
@@ -1405,7 +1448,7 @@ function NumberMemoryPage({ pwa }) {
   )
 }
 
-function VerbalMemoryPage({ pwa }) {
+function VerbalMemoryPage({ pwa, background }) {
   const sound = useSound()
   const verbal = useVerbalMemory(sound)
 
@@ -1424,6 +1467,10 @@ function VerbalMemoryPage({ pwa }) {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/verbal-memory">Verbal Memory</Link>
+            <BackgroundPicker
+              background={background.background}
+              onChange={background.setBackground}
+            />
             <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
           </div>
         </nav>
@@ -1437,15 +1484,28 @@ function VerbalMemoryPage({ pwa }) {
 
 function App() {
   const pwa = usePwaInstall()
+  const background = useBackground()
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home pwa={pwa} />} />
-        <Route path="/reaction-sprint" element={<ReactionSprintPage pwa={pwa} />} />
-        <Route path="/aim-trainer" element={<AimTrainerPage pwa={pwa} />} />
-        <Route path="/number-memory" element={<NumberMemoryPage pwa={pwa} />} />
-        <Route path="/verbal-memory" element={<VerbalMemoryPage pwa={pwa} />} />
+        <Route path="/" element={<Home pwa={pwa} background={background} />} />
+        <Route
+          path="/reaction-sprint"
+          element={<ReactionSprintPage pwa={pwa} background={background} />}
+        />
+        <Route
+          path="/aim-trainer"
+          element={<AimTrainerPage pwa={pwa} background={background} />}
+        />
+        <Route
+          path="/number-memory"
+          element={<NumberMemoryPage pwa={pwa} background={background} />}
+        />
+        <Route
+          path="/verbal-memory"
+          element={<VerbalMemoryPage pwa={pwa} background={background} />}
+        />
       </Routes>
     </BrowserRouter>
   )
