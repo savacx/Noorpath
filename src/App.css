@@ -355,10 +355,50 @@
   font-size: clamp(1.7rem, 3vw, 2.3rem);
 }
 
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9cc3ff;
+  margin: 0;
+}
+
+.kicker-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: rgba(109, 121, 255, 0.25);
+  color: #cfd7ff;
+  font-size: 12px;
+}
+
+.section-title {
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  margin: 8px 0 0;
+  letter-spacing: -0.01em;
+}
+
+.view-all {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(18, 20, 32, 0.6);
+  color: #e7ecff;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
 }
 
 .test-card {
@@ -849,6 +889,72 @@
 
 .reaction-page-card .card-footer {
   margin-top: 8px;
+}
+
+.aim {
+  position: relative;
+}
+
+.aim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.aim-board {
+  min-height: 320px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 14, 22, 0.9);
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.aim-board.running {
+  background: radial-gradient(circle at top, rgba(109, 121, 255, 0.1), transparent 60%),
+    rgba(12, 14, 22, 0.9);
+}
+
+.aim-placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  padding: 24px;
+  text-align: center;
+}
+
+.aim-target {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #ff7a59 60%, #ff3d3d 100%);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 24px rgba(255, 90, 50, 0.4);
+}
+
+.aim-panel {
+  background: rgba(18, 20, 32, 0.85);
+  border-radius: 22px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 16px;
+}
+
+.aim-metrics {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.aim-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 720px) {

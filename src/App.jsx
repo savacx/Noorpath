@@ -175,6 +175,103 @@ const useReactionSprint = () => {
   }
 }
 
+const useAimTrainer = () => {
+  const [running, setRunning] = useState(false)
+  const [score, setScore] = useState(0)
+  const [misses, setMisses] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(30)
+  const [target, setTarget] = useState({ x: 0, y: 0 })
+  const boardRef = useRef(null)
+  const timerRef = useRef(null)
+
+  const spawnTarget = () => {
+    const board = boardRef.current
+    if (!board) {
+      return
+    }
+    const rect = board.getBoundingClientRect()
+    const size = 56
+    const padding = 12
+    const maxX = Math.max(padding, rect.width - size - padding)
+    const maxY = Math.max(padding, rect.height - size - padding)
+    const x = padding + Math.random() * (maxX - padding)
+    const y = padding + Math.random() * (maxY - padding)
+    setTarget({ x, y })
+  }
+
+  useEffect(() => {
+    if (!running) {
+      return undefined
+    }
+    spawnTarget()
+    timerRef.current = window.setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          window.clearInterval(timerRef.current)
+          timerRef.current = null
+          setRunning(false)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [running])
+
+  const start = () => {
+    setScore(0)
+    setMisses(0)
+    setTimeLeft(30)
+    setRunning(true)
+  }
+
+  const reset = () => {
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    setRunning(false)
+    setScore(0)
+    setMisses(0)
+    setTimeLeft(30)
+  }
+
+  const hit = (event) => {
+    event.stopPropagation()
+    if (!running) {
+      return
+    }
+    setScore((prev) => prev + 1)
+    spawnTarget()
+  }
+
+  const miss = () => {
+    if (!running) {
+      return
+    }
+    setMisses((prev) => prev + 1)
+    spawnTarget()
+  }
+
+  return {
+    running,
+    score,
+    misses,
+    timeLeft,
+    target,
+    boardRef,
+    start,
+    reset,
+    hit,
+    miss,
+  }
+}
+
 function ReactionSprintSection({ reaction, showOpenLink }) {
   return (
     <section id="reaction" className="section reaction">
@@ -251,9 +348,75 @@ function ReactionSprintSection({ reaction, showOpenLink }) {
   )
 }
 
+function AimTrainerSection({ aim }) {
+  return (
+    <section id="aim-trainer" className="section aim">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">🎯 Aim Trainer</p>
+          <h2>Improve your mouse precision and clicking accuracy.</h2>
+        </div>
+        <div className="aim-metrics">
+          <div>
+            <p className="stat-label">Score</p>
+            <h3>{aim.score}</h3>
+          </div>
+          <div>
+            <p className="stat-label">Misses</p>
+            <h3>{aim.misses}</h3>
+          </div>
+          <div>
+            <p className="stat-label">Time</p>
+            <h3>{aim.timeLeft}s</h3>
+          </div>
+        </div>
+      </div>
+      <div className="aim-grid">
+        <button
+          type="button"
+          className={`aim-board ${aim.running ? 'running' : ''}`}
+          ref={aim.boardRef}
+          onClick={aim.miss}
+        >
+          {!aim.running && (
+            <div className="aim-placeholder">
+              <p>Click start, then tap the circle as fast as you can.</p>
+            </div>
+          )}
+          {aim.running && (
+            <button
+              type="button"
+              className="aim-target"
+              style={{ left: `${aim.target.x}px`, top: `${aim.target.y}px` }}
+              onClick={aim.hit}
+              aria-label="Target"
+            />
+          )}
+        </button>
+        <div className="aim-panel">
+          <h3>How it works</h3>
+          <p>
+            Hit as many targets as possible before the timer ends. Misses count
+            whenever you click outside the circle.
+          </p>
+          <div className="aim-actions">
+            <button className="secondary" onClick={aim.start}>
+              ▶ Start Test
+            </button>
+            <button className="ghost" onClick={aim.reset}>
+              ♻ Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Home({ pwa }) {
   const navigate = useNavigate()
   const reaction = useReactionSprint()
+  const aim = useAimTrainer()
 
   const coreTests = [
     {
@@ -362,7 +525,107 @@ function Home({ pwa }) {
   return (
     <div className="app">
       <PromoBanner />
-      <header className="hero" id="top">
+      <section id="tests" className="section">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">
+              <span className="kicker-icon">✓</span>
+              Core Brain Tests
+            </p>
+            <h2 className="section-title">
+              Reaction Time, Aim Trainer, Memory, and Multiplayer BrainTests.
+            </h2>
+          </div>
+          <button className="view-all" type="button">
+            👓 View All Tests
+          </button>
+        </div>
+        <div className="card-grid">
+          {coreTests.map((test) => (
+            <article
+              key={test.title}
+              className={`test-card ${
+                test.title === 'Reaction Time' || test.title === 'Aim Trainer'
+                  ? 'clickable'
+                  : ''
+              }`}
+              onClick={() => {
+                if (test.title === 'Reaction Time') {
+                  navigate('/reaction-sprint')
+                }
+                if (test.title === 'Aim Trainer') {
+                  navigate('/aim-trainer')
+                }
+              }}
+              role={
+                test.title === 'Reaction Time' || test.title === 'Aim Trainer'
+                  ? 'button'
+                  : undefined
+              }
+              tabIndex={
+                test.title === 'Reaction Time' || test.title === 'Aim Trainer'
+                  ? 0
+                  : undefined
+              }
+              onKeyDown={(event) => {
+                if (
+                  test.title === 'Reaction Time' &&
+                  (event.key === 'Enter' || event.key === ' ')
+                ) {
+                  navigate('/reaction-sprint')
+                }
+                if (
+                  test.title === 'Aim Trainer' &&
+                  (event.key === 'Enter' || event.key === ' ')
+                ) {
+                  navigate('/aim-trainer')
+                }
+              }}
+            >
+              <div className="test-header">
+                <div className="test-icon">{test.icon}</div>
+                <div>
+                  <h3>{test.title}</h3>
+                  <p>{test.description}</p>
+                </div>
+              </div>
+              <div className="test-divider" />
+              <div className="test-footer">
+                <div className={`test-level ${test.level.toLowerCase()}`}>
+                  <span className="level-dot" />
+                  {test.level}
+                </div>
+                <button className="share-pill" type="button">
+                  ♡ Share
+                </button>
+                {test.title === 'Reaction Time' ? (
+                  <button
+                    className="start-pill"
+                    type="button"
+                    onClick={() => navigate('/reaction-sprint')}
+                  >
+                    Start Test
+                  </button>
+                ) : test.title === 'Aim Trainer' ? (
+                  <button
+                    className="start-pill"
+                    type="button"
+                    onClick={() => navigate('/aim-trainer')}
+                  >
+                    Start Test
+                  </button>
+                ) : (
+                  <button className="start-pill" type="button">
+                    Start Test
+                  </button>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+<header className="hero" id="top">
         <nav className="nav">
           <div className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
@@ -443,71 +706,10 @@ function Home({ pwa }) {
         </div>
       </header>
 
-      <section id="tests" className="section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">🧪 Core Brain Tests</p>
-            <h2>Reaction Time, Aim Trainer, Memory, and Multiplayer BrainTests.</h2>
-          </div>
-          <button className="ghost">👀 View All Tests</button>
-        </div>
-        <div className="card-grid">
-          {coreTests.map((test) => (
-            <article
-              key={test.title}
-              className={`test-card ${test.title === 'Reaction Time' ? 'clickable' : ''}`}
-              onClick={() => {
-                if (test.title === 'Reaction Time') {
-                  navigate('/reaction-sprint')
-                }
-              }}
-              role={test.title === 'Reaction Time' ? 'button' : undefined}
-              tabIndex={test.title === 'Reaction Time' ? 0 : undefined}
-              onKeyDown={(event) => {
-                if (
-                  test.title === 'Reaction Time' &&
-                  (event.key === 'Enter' || event.key === ' ')
-                ) {
-                  navigate('/reaction-sprint')
-                }
-              }}
-            >
-              <div className="test-header">
-                <div className="test-icon">{test.icon}</div>
-                <div>
-                  <h3>{test.title}</h3>
-                  <p>{test.description}</p>
-                </div>
-              </div>
-              <div className="test-divider" />
-              <div className="test-footer">
-                <div className={`test-level ${test.level.toLowerCase()}`}>
-                  <span className="level-dot" />
-                  {test.level}
-                </div>
-                <button className="share-pill" type="button">
-                  ♡ Share
-                </button>
-                {test.title === 'Reaction Time' ? (
-                  <button
-                    className="start-pill"
-                    type="button"
-                    onClick={() => navigate('/reaction-sprint')}
-                  >
-                    Start Test
-                  </button>
-                ) : (
-                  <button className="start-pill" type="button">
-                    Start Test
-                  </button>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      
 
       <ReactionSprintSection reaction={reaction} showOpenLink />
+      <AimTrainerSection aim={aim} />
 
       <section className="section alt">
         <div className="section-heading">
@@ -666,7 +868,7 @@ function Home({ pwa }) {
           <a href="#tests">Tests</a>
           <a href="#progress">Progress</a>
           <a href="#plans">Plans</a>
-          <a href="#top">Contact</a>
+          <a href="#top">Back to Top</a>
         </div>
       </footer>
     </div>
@@ -702,6 +904,35 @@ function ReactionSprintPage({ pwa }) {
   )
 }
 
+function AimTrainerPage({ pwa }) {
+  const aim = useAimTrainer()
+
+  return (
+    <div className="app">
+      <PromoBanner />
+      <header className="hero">
+        <nav className="nav">
+          <div className="brand">
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
+            <div>
+              <p className="brand-title">Noorpath</p>
+              <p className="brand-tag">Brain Test Studio</p>
+            </div>
+          </div>
+          <div className="nav-links">
+            <Link to="/">Home</Link>
+            <Link to="/aim-trainer">Aim Trainer</Link>
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
+          </div>
+        </nav>
+        <div className="reaction-page" />
+      </header>
+
+      <AimTrainerSection aim={aim} />
+    </div>
+  )
+}
+
 function App() {
   const pwa = usePwaInstall()
 
@@ -710,6 +941,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home pwa={pwa} />} />
         <Route path="/reaction-sprint" element={<ReactionSprintPage pwa={pwa} />} />
+        <Route path="/aim-trainer" element={<AimTrainerPage pwa={pwa} />} />
       </Routes>
     </BrowserRouter>
   )
