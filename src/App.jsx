@@ -36,6 +36,64 @@ function PromoBanner() {
   )
 }
 
+const usePwaInstall = () => {
+  const [promptEvent, setPromptEvent] = useState(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    const handlePrompt = (event) => {
+      event.preventDefault()
+      setPromptEvent(event)
+    }
+
+    const handleInstalled = () => {
+      setInstalled(true)
+      setPromptEvent(null)
+    }
+
+    window.addEventListener('beforeinstallprompt', handlePrompt)
+    window.addEventListener('appinstalled', handleInstalled)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handlePrompt)
+      window.removeEventListener('appinstalled', handleInstalled)
+    }
+  }, [])
+
+  const install = async () => {
+    if (!promptEvent) {
+      return
+    }
+    promptEvent.prompt()
+    try {
+      await promptEvent.userChoice
+    } finally {
+      setPromptEvent(null)
+    }
+  }
+
+  return {
+    canInstall: !!promptEvent && !installed,
+    install,
+  }
+}
+
+function InstallButton({ canInstall, onInstall }) {
+  return (
+    <button
+      className="install-button"
+      type="button"
+      onClick={onInstall}
+      disabled={!canInstall}
+      aria-disabled={!canInstall}
+      title={canInstall ? 'Install Noorpath' : 'Install not available'}
+    >
+      <span className="install-icon">⬇️</span>
+      Install App
+    </button>
+  )
+}
+
 const useReactionSprint = () => {
   const [phase, setPhase] = useState('idle')
   const [lastTime, setLastTime] = useState(null)
@@ -122,8 +180,8 @@ function ReactionSprintSection({ reaction, showOpenLink }) {
     <section id="reaction" className="section reaction">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">🔥 Reaction Sprint</p>
-          <h2>Tap fast when the panel turns orange.</h2>
+          <p className="eyebrow">🔥 Reaction Time Test</p>
+          <h2>Test your reflexes and response speed to visual stimuli.</h2>
         </div>
         <div className="reaction-metrics">
           <div>
@@ -160,8 +218,8 @@ function ReactionSprintSection({ reaction, showOpenLink }) {
         <div className="reaction-panel">
           <h3>How it works</h3>
           <p>
-            Reaction Sprint measures your visual response time. Tap only after
-            the panel turns orange to log a valid result.
+            Reaction Time measures your visual response speed. Tap only after the
+            panel turns orange to log a valid result.
           </p>
           <div className="history">
             <p className="stat-label">Recent attempts</p>
@@ -193,71 +251,111 @@ function ReactionSprintSection({ reaction, showOpenLink }) {
   )
 }
 
-function Home() {
+function Home({ pwa }) {
   const navigate = useNavigate()
   const reaction = useReactionSprint()
 
   const coreTests = [
     {
-      title: 'Reaction Sprint',
-      description: 'Measure response speed to visual cues and track micro-improvements.',
+      title: 'Reaction Time',
+      description: 'Test your reflexes and response speed to visual stimuli.',
       level: 'Easy',
       duration: '2 min',
       icon: '⏱️',
     },
     {
-      title: 'Focus Aim',
-      description: 'Sharpen precision and hand-eye timing with moving targets.',
+      title: 'Aim Trainer',
+      description: 'Improve your mouse precision and clicking accuracy.',
       level: 'Medium',
       duration: '3 min',
       icon: '🎯',
     },
     {
-      title: 'Number Recall',
-      description: 'Remember growing sequences and build working memory stamina.',
+      title: 'Number Memory',
+      description: 'Remember and recall sequences of numbers.',
       level: 'Medium',
       duration: '4 min',
       icon: '🔢',
     },
     {
-      title: 'Verbal Map',
-      description: 'Train rapid word retention and long-term vocabulary recall.',
+      title: 'Verbal Memory',
+      description: 'Test your ability to remember words and avoid repetition.',
       level: 'Hard',
       duration: '5 min',
       icon: '🔤',
     },
     {
-      title: 'Pattern Grid',
-      description: 'Recreate spatial patterns and expand visual memory range.',
+      title: 'Visual Memory',
+      description: 'Remember patterns and spatial arrangements.',
       level: 'Medium',
       duration: '4 min',
       icon: '👁️',
     },
     {
-      title: 'Logic Pulse',
-      description: 'Solve timed reasoning puzzles under light pressure.',
+      title: 'Chimp Test',
+      description: 'Remember number sequences like a chimpanzee.',
       level: 'Hard',
-      duration: '6 min',
-      icon: '🧠',
+      duration: '5 min',
+      icon: '🐵',
+    },
+    {
+      title: 'Typing Speed',
+      description: 'Test your words per minute and typing accuracy.',
+      level: 'Easy',
+      duration: '4 min',
+      icon: '⌨️',
+    },
+    {
+      title: 'Sequence Memory',
+      description: 'Watch and repeat color sequences.',
+      level: 'Medium',
+      duration: '4 min',
+      icon: '🧩',
     },
   ]
 
   const newTests = [
     {
-      title: 'Emotion Scan',
-      description: 'Identify expressions and read subtle facial cues.',
+      title: 'Emotion Recognition',
+      description: 'Identify emotions from facial expressions and body language.',
       level: 'Medium',
+      isNew: true,
     },
     {
-      title: 'Audio Thread',
-      description: 'Match tones, rhythm, and spoken phrases with accuracy.',
+      title: 'Audio Memory',
+      description: 'Match and sequence tones, beats, or spoken words.',
       level: 'Medium',
-      duration: '3 min',
+      isNew: true,
     },
     {
       title: 'Pattern Shift',
-      description: 'Spot micro-changes in moving sequences.',
+      description: 'Spot pattern anomalies and changes in real-time.',
       level: 'Hard',
+      isNew: true,
+    },
+    {
+      title: 'Distraction Control',
+      description: 'Solve tasks while being distracted by noise and motion.',
+      level: 'Hard',
+      isNew: true,
+    },
+    {
+      title: 'Logic Sprint',
+      description: 'Timed logic puzzles and pattern recognition challenges.',
+      level: 'Medium',
+      isNew: true,
+    },
+    {
+      title: 'Multi-Tasker',
+      description: 'Juggle 2-3 mini tasks simultaneously on screen.',
+      level: 'Hard',
+      isNew: true,
+    },
+    {
+      title: 'Spatial Reasoning & Prediction',
+      description: "Predict the target's location from patterned visual cues.",
+      level: 'Hard',
+      isNew: true,
     },
   ]
 
@@ -278,6 +376,7 @@ function Home() {
             <Link to="/reaction-sprint">Reaction</Link>
             <a href="#progress">Progress</a>
             <a href="#plans">Plans</a>
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
             <button className="ghost">Sign In</button>
           </div>
         </nav>
@@ -288,10 +387,11 @@ function Home() {
             <div className="hero-logo-wrap">
               <img className="hero-logo" src={logo} alt="Noorpath logo" />
             </div>
-            <h1>Build sharper focus with guided brain tests.</h1>
+            <h1>BrainTests Multiplayer for focus, memory, and speed.</h1>
             <p className="lead">
-              Noorpath blends micro-tests, adaptive challenges, and progress insights
-              so you can train clarity, memory, and speed in just a few minutes a day.
+              Noorpath blends multiplayer brain tests, adaptive challenges, and
+              progress insights so you can train clarity, memory, and speed in just
+              a few minutes a day.
             </p>
             <div className="hero-actions">
               <button className="primary">🚀 Start a Free Session</button>
@@ -321,7 +421,7 @@ function Home() {
             <div className="hero-card-body">
               <div className="mini-row">
                 <span className="mini-title">Warm-up</span>
-                <span className="mini-value">Reaction Sprint - 2 min</span>
+                <span className="mini-value">Reaction Time - 2 min</span>
               </div>
               <div className="mini-row">
                 <span className="mini-title">Core Block</span>
@@ -347,7 +447,7 @@ function Home() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">🧪 Core Brain Tests</p>
-            <h2>Train the essentials with science-backed routines.</h2>
+            <h2>Reaction Time, Aim Trainer, Memory, and Multiplayer BrainTests.</h2>
           </div>
           <button className="ghost">👀 View All Tests</button>
         </div>
@@ -355,17 +455,17 @@ function Home() {
           {coreTests.map((test) => (
             <article
               key={test.title}
-              className={`test-card ${test.title === 'Reaction Sprint' ? 'clickable' : ''}`}
+              className={`test-card ${test.title === 'Reaction Time' ? 'clickable' : ''}`}
               onClick={() => {
-                if (test.title === 'Reaction Sprint') {
+                if (test.title === 'Reaction Time') {
                   navigate('/reaction-sprint')
                 }
               }}
-              role={test.title === 'Reaction Sprint' ? 'button' : undefined}
-              tabIndex={test.title === 'Reaction Sprint' ? 0 : undefined}
+              role={test.title === 'Reaction Time' ? 'button' : undefined}
+              tabIndex={test.title === 'Reaction Time' ? 0 : undefined}
               onKeyDown={(event) => {
                 if (
-                  test.title === 'Reaction Sprint' &&
+                  test.title === 'Reaction Time' &&
                   (event.key === 'Enter' || event.key === ' ')
                 ) {
                   navigate('/reaction-sprint')
@@ -388,7 +488,7 @@ function Home() {
                 <button className="share-pill" type="button">
                   ♡ Share
                 </button>
-                {test.title === 'Reaction Sprint' ? (
+                {test.title === 'Reaction Time' ? (
                   <button
                     className="start-pill"
                     type="button"
@@ -412,17 +512,20 @@ function Home() {
       <section className="section alt">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">🧬 New & Unique</p>
-            <h2>Fresh challenges for advanced focus.</h2>
+            <p className="eyebrow">🧠 New & Unique Tests</p>
+            <h2>Innovative cognitive challenges you won't find elsewhere.</h2>
           </div>
-          <span className="pill">Premium Preview</span>
+          <span className="pill">Premium</span>
         </div>
         <div className="split">
           <div className="stack">
             {newTests.map((test) => (
               <div key={test.title} className="mini-card">
                 <div>
-                  <h3>{test.title}</h3>
+                  <h3>
+                    {test.title}
+                    {test.isNew && <span className="new-badge">NEW</span>}
+                  </h3>
                   <p>{test.description}</p>
                 </div>
                 <span className="pill">{test.level}</span>
@@ -570,7 +673,7 @@ function Home() {
   )
 }
 
-function ReactionSprintPage() {
+function ReactionSprintPage({ pwa }) {
   const reaction = useReactionSprint()
 
   return (
@@ -588,6 +691,7 @@ function ReactionSprintPage() {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/reaction-sprint">Reaction</Link>
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
           </div>
         </nav>
         <div className="reaction-page" />
@@ -599,11 +703,13 @@ function ReactionSprintPage() {
 }
 
 function App() {
+  const pwa = usePwaInstall()
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/reaction-sprint" element={<ReactionSprintPage />} />
+        <Route path="/" element={<Home pwa={pwa} />} />
+        <Route path="/reaction-sprint" element={<ReactionSprintPage pwa={pwa} />} />
       </Routes>
     </BrowserRouter>
   )

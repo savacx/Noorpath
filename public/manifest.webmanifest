@@ -1,0 +1,17 @@
+{
+  "name": "Noorpath",
+  "short_name": "Noorpath",
+  "description": "BrainTests Multiplayer with reaction time and memory challenges.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d16",
+  "theme_color": "#0b0d16",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
