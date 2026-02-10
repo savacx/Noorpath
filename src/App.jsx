@@ -956,13 +956,13 @@ function Home({ pwa, background }) {
       <PromoBanner />
       <header className="hero" id="top">
         <nav className="nav">
-          <div className="brand">
+          <Link to="/" className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
               <p className="brand-title">Noorpath</p>
               <p className="brand-tag">Brain Test Studio</p>
             </div>
-          </div>
+          </Link>
           <div className="nav-links">
             <a href="#tests">Tests</a>
             <Link to="/reaction-sprint">Reaction</Link>
@@ -1362,13 +1362,13 @@ function ReactionSprintPage({ pwa, background }) {
       <PromoBanner />
       <header className="hero">
         <nav className="nav">
-          <div className="brand">
+          <Link to="/" className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
               <p className="brand-title">Noorpath</p>
               <p className="brand-tag">Brain Test Studio</p>
             </div>
-          </div>
+          </Link>
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/reaction-sprint">Reaction</Link>
@@ -1396,13 +1396,13 @@ function AimTrainerPage({ pwa, background }) {
       <PromoBanner />
       <header className="hero">
         <nav className="nav">
-          <div className="brand">
+          <Link to="/" className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
               <p className="brand-title">Noorpath</p>
               <p className="brand-tag">Brain Test Studio</p>
             </div>
-          </div>
+          </Link>
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/aim-trainer">Aim Trainer</Link>
@@ -1430,13 +1430,13 @@ function NumberMemoryPage({ pwa, background }) {
       <PromoBanner />
       <header className="hero">
         <nav className="nav">
-          <div className="brand">
+          <Link to="/" className="brand">
             <img className="brand-logo" src={logo} alt="Noorpath logo" />
             <div>
               <p className="brand-title">Noorpath</p>
               <p className="brand-tag">Brain Test Studio</p>
             </div>
-          </div>
+          </Link>
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/number-memory">Number Memory</Link>
