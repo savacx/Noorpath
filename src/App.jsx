@@ -954,91 +954,6 @@ function Home({ pwa, background }) {
   return (
     <div className="app">
       <PromoBanner />
-      <header className="hero" id="top">
-        <nav className="nav">
-          <Link to="/" className="brand">
-            <img className="brand-logo" src={logo} alt="Noorpath logo" />
-            <div>
-              <p className="brand-title">Noorpath</p>
-              <p className="brand-tag">Brain Test Studio</p>
-            </div>
-          </Link>
-          <div className="nav-links">
-            <a href="#tests">Tests</a>
-            <Link to="/reaction-sprint">Reaction</Link>
-            <a href="#progress">Progress</a>
-            <a href="#plans">Plans</a>
-            <BackgroundPicker
-              background={background.background}
-              onChange={background.setBackground}
-            />
-            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
-            <button className="ghost">Sign In</button>
-          </div>
-        </nav>
-
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">⚡ Cognitive training for real life</p>
-            <div className="hero-logo-wrap">
-              <img className="hero-logo" src={logo} alt="Noorpath logo" />
-            </div>
-            <h1>BrainTests Multiplayer for focus, memory, and speed.</h1>
-            <p className="lead">
-              Noorpath blends multiplayer brain tests, adaptive challenges, and
-              progress insights so you can train clarity, memory, and speed in just
-              a few minutes a day.
-            </p>
-            <div className="hero-actions">
-              <button className="primary">🚀 Start a Free Session</button>
-              <button className="secondary">🧠 Explore Test Library</button>
-            </div>
-            <div className="hero-metrics">
-              <div>
-                <h3>8</h3>
-                <p>🧩 Core test types</p>
-              </div>
-              <div>
-                <h3>12 min</h3>
-                <p>⏱ Average session</p>
-              </div>
-              <div>
-                <h3>98%</h3>
-                <p>✅ Completion rate</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-card">
-            <div className="hero-card-header">
-              <p className="card-title">🎯 Today's Focus Path</p>
-              <span className="pill">Personalized</span>
-            </div>
-            <div className="hero-card-body">
-              <div className="mini-row">
-                <span className="mini-title">Warm-up</span>
-                <span className="mini-value">Reaction Time - 2 min</span>
-              </div>
-              <div className="mini-row">
-                <span className="mini-title">Core Block</span>
-                <span className="mini-value">Pattern Grid - 4 min</span>
-              </div>
-              <div className="mini-row">
-                <span className="mini-title">Challenge</span>
-                <span className="mini-value">Logic Pulse - 6 min</span>
-              </div>
-              <div className="progress">
-                <div className="progress-track">
-                  <div className="progress-fill" />
-                </div>
-                <p>Weekly goal: 3 of 5 sessions completed</p>
-              </div>
-              <button className="primary full">▶ Resume Session</button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <section id="tests" className="section">
         <div className="section-heading">
           <div>
@@ -1181,6 +1096,93 @@ function Home({ pwa, background }) {
           ))}
         </div>
       </section>
+
+<header className="hero" id="top">
+        <nav className="nav">
+          <Link to="/" className="brand">
+            <img className="brand-logo" src={logo} alt="Noorpath logo" />
+            <div>
+              <p className="brand-title">Noorpath</p>
+              <p className="brand-tag">Brain Test Studio</p>
+            </div>
+          </Link>
+          <div className="nav-links">
+            <a href="#tests">Tests</a>
+            <Link to="/reaction-sprint">Reaction</Link>
+            <a href="#progress">Progress</a>
+            <a href="#plans">Plans</a>
+            <BackgroundPicker
+              background={background.background}
+              onChange={background.setBackground}
+            />
+            <InstallButton canInstall={pwa.canInstall} onInstall={pwa.install} />
+            <button className="ghost">Sign In</button>
+          </div>
+        </nav>
+
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <p className="eyebrow">⚡ Cognitive training for real life</p>
+            <div className="hero-logo-wrap">
+              <img className="hero-logo" src={logo} alt="Noorpath logo" />
+            </div>
+            <h1>BrainTests Multiplayer for focus, memory, and speed.</h1>
+            <p className="lead">
+              Noorpath blends multiplayer brain tests, adaptive challenges, and
+              progress insights so you can train clarity, memory, and speed in just
+              a few minutes a day.
+            </p>
+            <div className="hero-actions">
+              <button className="primary">🚀 Start a Free Session</button>
+              <button className="secondary">🧠 Explore Test Library</button>
+            </div>
+            <div className="hero-metrics">
+              <div>
+                <h3>8</h3>
+                <p>🧩 Core test types</p>
+              </div>
+              <div>
+                <h3>12 min</h3>
+                <p>⏱ Average session</p>
+              </div>
+              <div>
+                <h3>98%</h3>
+                <p>✅ Completion rate</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-card">
+            <div className="hero-card-header">
+              <p className="card-title">🎯 Today's Focus Path</p>
+              <span className="pill">Personalized</span>
+            </div>
+            <div className="hero-card-body">
+              <div className="mini-row">
+                <span className="mini-title">Warm-up</span>
+                <span className="mini-value">Reaction Time - 2 min</span>
+              </div>
+              <div className="mini-row">
+                <span className="mini-title">Core Block</span>
+                <span className="mini-value">Pattern Grid - 4 min</span>
+              </div>
+              <div className="mini-row">
+                <span className="mini-title">Challenge</span>
+                <span className="mini-value">Logic Pulse - 6 min</span>
+              </div>
+              <div className="progress">
+                <div className="progress-track">
+                  <div className="progress-fill" />
+                </div>
+                <p>Weekly goal: 3 of 5 sessions completed</p>
+              </div>
+              <button className="primary full">▶ Resume Session</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      
 
       
 
