@@ -554,6 +554,104 @@ const useVerbalMemory = (sound) => {
   }
 }
 
+const useVisualMemory = (sound) => {
+  const [phase, setPhase] = useState('idle')
+  const [level, setLevel] = useState(1)
+  const [best, setBest] = useState(1)
+  const [pattern, setPattern] = useState([])
+  const [selected, setSelected] = useState([])
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
+
+  const createPattern = (nextLevel) => {
+    const maxCells = 9
+    const count = Math.min(maxCells, 2 + nextLevel)
+    const indices = Array.from({ length: maxCells }, (_, index) => index)
+    for (let i = indices.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[indices[i], indices[j]] = [indices[j], indices[i]]
+    }
+    return indices.slice(0, count).sort((a, b) => a - b)
+  }
+
+  const startRound = (nextLevel) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    const nextPattern = createPattern(nextLevel)
+    setLevel(nextLevel)
+    setPattern(nextPattern)
+    setSelected([])
+    setPhase('show')
+    const revealDuration = Math.min(2400, 900 + nextLevel * 220)
+    timerRef.current = setTimeout(() => {
+      setPhase('input')
+    }, revealDuration)
+  }
+
+  const start = () => {
+    startRound(1)
+  }
+
+  const toggleCell = (index) => {
+    if (phase !== 'input') {
+      return
+    }
+    setSelected((prev) =>
+      prev.includes(index) ? prev.filter((value) => value !== index) : [...prev, index]
+    )
+  }
+
+  const submit = () => {
+    if (phase !== 'input') {
+      return
+    }
+    const guess = [...selected].sort((a, b) => a - b)
+    const isCorrect =
+      guess.length === pattern.length &&
+      guess.every((value, index) => value === pattern[index])
+
+    if (isCorrect) {
+      const nextLevel = level + 1
+      setBest((prev) => Math.max(prev, nextLevel))
+      sound?.correct?.()
+      startRound(nextLevel)
+    } else {
+      setPhase('result')
+      sound?.wrong?.()
+    }
+  }
+
+  const reset = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    setPhase('idle')
+    setLevel(1)
+    setPattern([])
+    setSelected([])
+  }
+
+  return {
+    phase,
+    level,
+    best,
+    pattern,
+    selected,
+    start,
+    toggleCell,
+    submit,
+    reset,
+  }
+}
+
 function ReactionSprintSection({ reaction, showOpenLink }) {
   return (
     <section id="reaction" className="section reaction">
@@ -863,6 +961,83 @@ function VerbalMemorySection({ verbal }) {
   )
 }
 
+function VisualMemorySection({ visual }) {
+  const messageByPhase = {
+    idle: 'Memorize the highlighted tiles, then recreate the pattern.',
+    show: 'Watch carefully...',
+    input: 'Select the tiles that were highlighted, then submit.',
+    result: 'Round over. Try again and beat your best level.',
+  }
+
+  return (
+    <section id="visual-memory" className="section visual">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">👁 Visual Memory</p>
+          <h2>Remember tile patterns and reproduce them as levels increase.</h2>
+        </div>
+        <div className="visual-metrics">
+          <div>
+            <p className="stat-label">Level</p>
+            <h3>{visual.level}</h3>
+          </div>
+          <div>
+            <p className="stat-label">Best</p>
+            <h3>{visual.best}</h3>
+          </div>
+        </div>
+      </div>
+      <div className="visual-grid">
+        <div className="visual-board-wrap">
+          <div className="visual-board">
+            {Array.from({ length: 9 }, (_, index) => {
+              const isPattern = visual.pattern.includes(index)
+              const isSelected = visual.selected.includes(index)
+              const className = `visual-cell ${
+                visual.phase === 'show' && isPattern
+                  ? 'show'
+                  : isSelected
+                  ? 'selected'
+                  : ''
+              }`
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  className={className}
+                  onClick={() => visual.toggleCell(index)}
+                  aria-label={`Cell ${index + 1}`}
+                />
+              )
+            })}
+          </div>
+          <p className="visual-hint">{messageByPhase[visual.phase]}</p>
+        </div>
+        <div className="visual-panel">
+          <h3>How it works</h3>
+          <p>
+            A pattern briefly appears on the 3x3 board. Recreate it from memory.
+            Every correct round adds one tile.
+          </p>
+          <div className="visual-actions">
+            <button className="secondary" onClick={visual.start}>
+              ▶ Start Test
+            </button>
+            {visual.phase === 'input' && (
+              <button className="primary" onClick={visual.submit}>
+                Submit Pattern
+              </button>
+            )}
+            <button className="ghost" onClick={visual.reset}>
+              ♻ Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Home({ pwa, background }) {
   const navigate = useNavigate()
   const sound = useSound()
@@ -870,6 +1045,7 @@ function Home({ pwa, background }) {
   const aim = useAimTrainer(sound)
   const memory = useNumberMemory(sound)
   const verbal = useVerbalMemory(sound)
+  const visual = useVisualMemory(sound)
 
   const coreTests = [
     {
@@ -1008,7 +1184,8 @@ function Home({ pwa, background }) {
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
                 test.title === 'Number Memory' ||
-                test.title === 'Verbal Memory'
+                test.title === 'Verbal Memory' ||
+                test.title === 'Visual Memory'
                   ? 'clickable'
                   : ''
               }`}
@@ -1025,12 +1202,16 @@ function Home({ pwa, background }) {
                 if (test.title === 'Verbal Memory') {
                   navigate('/verbal-memory')
                 }
+                if (test.title === 'Visual Memory') {
+                  navigate('/visual-memory')
+                }
               }}
               role={
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
                 test.title === 'Number Memory' ||
-                test.title === 'Verbal Memory'
+                test.title === 'Verbal Memory' ||
+                test.title === 'Visual Memory'
                   ? 'button'
                   : undefined
               }
@@ -1038,7 +1219,8 @@ function Home({ pwa, background }) {
                 test.title === 'Reaction Time' ||
                 test.title === 'Aim Trainer' ||
                 test.title === 'Number Memory' ||
-                test.title === 'Verbal Memory'
+                test.title === 'Verbal Memory' ||
+                test.title === 'Visual Memory'
                   ? 0
                   : undefined
               }
@@ -1066,6 +1248,12 @@ function Home({ pwa, background }) {
                   (event.key === 'Enter' || event.key === ' ')
                 ) {
                   navigate('/verbal-memory')
+                }
+                if (
+                  test.title === 'Visual Memory' &&
+                  (event.key === 'Enter' || event.key === ' ')
+                ) {
+                  navigate('/visual-memory')
                 }
               }}
             >
@@ -1114,6 +1302,14 @@ function Home({ pwa, background }) {
                     className="start-pill"
                     type="button"
                     onClick={() => navigate('/verbal-memory')}
+                  >
+                    Start Test
+                  </button>
+                ) : test.title === 'Visual Memory' ? (
+                  <button
+                    className="start-pill"
+                    type="button"
+                    onClick={() => navigate('/visual-memory')}
                   >
                     Start Test
                   </button>
@@ -1199,6 +1395,7 @@ function Home({ pwa, background }) {
       <AimTrainerSection aim={aim} />
       <NumberMemorySection memory={memory} />
       <VerbalMemorySection verbal={verbal} />
+      <VisualMemorySection visual={visual} />
 
       <section className="section alt">
         <div className="section-heading">
@@ -1444,6 +1641,26 @@ function VerbalMemoryPage({ pwa, background }) {
   )
 }
 
+function VisualMemoryPage({ pwa, background }) {
+  const sound = useSound()
+  const visual = useVisualMemory(sound)
+
+  return (
+    <div className="app">
+      <PromoBanner />
+      <NavBar background={background} pwa={pwa}>
+        <Link to="/">Home</Link>
+        <Link to="/visual-memory">Visual Memory</Link>
+      </NavBar>
+      <header className="hero">
+        <div className="reaction-page" />
+      </header>
+
+      <VisualMemorySection visual={visual} />
+    </div>
+  )
+}
+
 function App() {
   const pwa = usePwaInstall()
   const background = useBackground()
@@ -1467,6 +1684,10 @@ function App() {
         <Route
           path="/verbal-memory"
           element={<VerbalMemoryPage pwa={pwa} background={background} />}
+        />
+        <Route
+          path="/visual-memory"
+          element={<VisualMemoryPage pwa={pwa} background={background} />}
         />
       </Routes>
     </BrowserRouter>
